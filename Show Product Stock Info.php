@@ -1,12 +1,12 @@
 add_action('woocommerce_after_add_to_cart_form', 'display_product_stock_info', 20);
 
-// helper functions
-function get_item_id_by_item_code($itemCode) {
+// // helper functions
+function get_item_id_by_item_code($itemCode, $apikey, $url) {
     $soap_request = '<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
         <soap:Header>
             <KlozHeader xmlns="http://klozinc.exocloud.ca/">
-                <apikey>Test@apikloz</apikey>
+                <apikey>'.$apikey.'</apikey>
             </KlozHeader>
         </soap:Header>
         <soap:Body>
@@ -19,7 +19,7 @@ function get_item_id_by_item_code($itemCode) {
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx',
+        CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -45,18 +45,24 @@ function get_item_id_by_item_code($itemCode) {
     $xml->registerXPathNamespace('ns', 'http://klozinc.exocloud.ca/');
 
     // Extract currencies
-    $item_id = $xml->xpath('//ns:id')[0];
+    try {
+		$item_id = $xml->xpath('//ns:id')[0];
+		return $item_id;
+	} catch {
+		return 0;
+	}
+    
 
-	return $item_id;
+	
 }
 
-function get_item_stock_by_item_id($itemId) {
+function get_item_stock_by_item_id($itemId, $apikey, $url) {
     // Define the SOAP request
     $soap_request = '<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
         <soap:Header>
             <KlozHeader xmlns="http://klozinc.exocloud.ca/">
-                <apikey>Test@apikloz</apikey>
+                <apikey>'.$apikey.'</apikey>
             </KlozHeader>
         </soap:Header>
         <soap:Body>
@@ -71,7 +77,7 @@ function get_item_stock_by_item_id($itemId) {
 
     // Set cURL options
     curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx',
+        CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -103,8 +109,8 @@ function get_item_stock_by_item_id($itemId) {
         $colorId = (string)$stock->Color;
         $sizeId = (string)$stock->Size;
         
-        $colorName = $colorId ? get_color_name_by_color_id($colorId) : null;
-        $sizeName = $sizeId ? get_size_name_by_size_id($sizeId) : null;
+        $colorName = $colorId ? get_color_name_by_color_id($colorId, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx') : null;
+        $sizeName = $sizeId ? get_size_name_by_size_id($sizeId, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx') : null;
         
         $stock_items[] = [
             'Item' => (string)$stock->Item,
@@ -120,12 +126,12 @@ function get_item_stock_by_item_id($itemId) {
     return $stock_items;
 }
 
-function get_color_name_by_color_id($colorId) {
+function get_color_name_by_color_id($colorId, $apikey, $url) {
     $soap_request = '<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
         <soap:Header>
             <KlozHeader xmlns="http://klozinc.exocloud.ca/">
-                <apikey>Test@apikloz</apikey>
+                <apikey>'.$apikey.'</apikey>
             </KlozHeader>
         </soap:Header>
         <soap:Body>
@@ -136,7 +142,7 @@ function get_color_name_by_color_id($colorId) {
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx',
+        CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -174,12 +180,12 @@ function get_color_name_by_color_id($colorId) {
     return null; // Return null if the colorId is not found
 }
 
-function get_size_name_by_size_id($sizeId) {
+function get_size_name_by_size_id($sizeId, $apikey, $url) {
     $soap_request = '<?xml version="1.0" encoding="utf-8"?>
     <soap:Envelope xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
         <soap:Header>
             <KlozHeader xmlns="http://klozinc.exocloud.ca/">
-                <apikey>Test@apikloz</apikey>
+                <apikey>'.$apikey.'</apikey>
             </KlozHeader>
         </soap:Header>
         <soap:Body>
@@ -190,7 +196,7 @@ function get_size_name_by_size_id($sizeId) {
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
-        CURLOPT_URL => 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx',
+        CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -236,8 +242,8 @@ function display_product_stock_info() {
     if ($product) {
         // Function to get stock information by item code
         $item_code = $product->get_sku();
-        $item_id = get_item_id_by_item_code($item_code);
-        $item_stocks = get_item_stock_by_item_id($item_id);
+        $item_id = get_item_id_by_item_code($item_code,'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
+        $item_stocks = get_item_stock_by_item_id($item_id, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
         $product_name = $product->get_name();
 
         // Display information for single products
@@ -280,8 +286,8 @@ function display_product_stock_info() {
 					$bundled_product = $bundled_item->get_product();
 					$bundled_sku = $bundled_product->get_sku();
 					$bundled_product_name = $bundled_product->get_name();
-					$bundled_item_id = get_item_id_by_item_code($bundled_sku);
-					$bundled_item_stocks = get_item_stock_by_item_id($bundled_item_id);
+					$bundled_item_id = get_item_id_by_item_code($bundled_sku,'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
+					$bundled_item_stocks = get_item_stock_by_item_id($bundled_item_id, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
 
 					echo "<div class='bundledProdInfo'>";
 					echo "<p>Bundled Product ID: <b>$bundled_item_id</b></p>";
