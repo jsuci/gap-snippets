@@ -96,7 +96,7 @@ function create_erp_sales_order($current_order, $apikey, $url) {
             <SOItems>
               <itemid>" . htmlspecialchars($item['itemid'], ENT_QUOTES, 'UTF-8') . "</itemid>
               <itemcode>" . htmlspecialchars($item['itemcode'], ENT_QUOTES, 'UTF-8') . "</itemcode>
-              <itemDescription>" . htmlspecialchars($item['itemDescription'], ENT_QUOTES, 'UTF-8') . "</itemDescription>
+              <itemDescription>" . htmlspecialchars($item['itemDescription'] ?? '', ENT_QUOTES, 'UTF-8') . "</itemDescription>
               <itemColorid>" . htmlspecialchars($item['itemColorid'], ENT_QUOTES, 'UTF-8') . "</itemColorid>
               <itemSizeid>" . htmlspecialchars($item['itemSizeid'], ENT_QUOTES, 'UTF-8') . "</itemSizeid>
               <itemQuantity>" . htmlspecialchars($item['itemQuantity'], ENT_QUOTES, 'UTF-8') . "</itemQuantity>
@@ -234,17 +234,27 @@ function get_item_by_itemcode($itemcode, $apikey, $url) {
     $xml->registerXPathNamespace('ns', 'http://klozinc.exocloud.ca/');
 
     // Extract the required fields
-    $id = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:id')[0];
-    $itemCode = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:Itemcode')[0];
-    $itemDesp = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:ItemDesp')[0];
-	$itemName = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:ItemName')[0];
+    if ($xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:id')) {
+        $id = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:id')[0];
+        $itemCode = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:Itemcode')[0];
+        $itemDesp = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:ItemDesp')[0];
+        $itemName = (string)$xml->xpath('//ns:GetItemByItemCodeResult/ns:Item/ns:ItemName')[0];
 
-    return array(
-        'itemid' => $id,
-        'itemcode' => $itemCode,
-        'itemDescription' => $itemDesp,
-		'itemName' => $itemName
-    );
+        return array(
+            'itemid' => $id,
+            'itemcode' => $itemCode,
+            'itemDescription' => $itemDesp,
+            'itemName' => $itemName
+        );
+    } else {
+        return array(
+            'itemid' => 0,
+            'itemcode' => '',
+            'itemDescription' => '',
+            'itemName' => ''
+        );
+    }
+
 }
 
 
@@ -516,9 +526,9 @@ function get_wc_order_details($order_id) {
 				$erp_item = get_item_by_itemcode($variation_sku, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
 
 				$items[$index] = array(
-					'itemid' => $erp_item['itemid'],
+					'itemid' => $erp_item['itemid'] ?? 0,
 					'itemcode' => $variation_sku,
-					'itemDescription' => $erp_item['itemName'],
+					'itemDescription' => $erp_item['itemName'] ?? '',
 					'itemColorid' => '',
 					'itemSizeid' => '',
 					'itemQuantity' => $item_quantity,
@@ -530,9 +540,9 @@ function get_wc_order_details($order_id) {
 			} else {
 				$erp_item = get_item_by_itemcode($product_sku, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
 				$items[$index] = array(
-					'itemid' => $erp_item['itemid'],
+					'itemid' => $erp_item['itemid'] ?? 0,
 					'itemcode' => $product_sku,
-					'itemDescription' => $erp_item['itemName'],
+					'itemDescription' => $erp_item['itemName'] ?? '',
 					'itemColorid' => '',
 					'itemSizeid' => '',
 					'itemQuantity' => $item_quantity,
