@@ -44,16 +44,12 @@ function get_item_id_by_item_code($itemCode, $apikey, $url) {
     $xml->registerXPathNamespace('soap', 'http://schemas.xmlsoap.org/soap/envelope/');
     $xml->registerXPathNamespace('ns', 'http://klozinc.exocloud.ca/');
 
-    // Extract currencies
-    try {
+    if ($xml->xpath('//ns:id')) {
 		$item_id = $xml->xpath('//ns:id')[0];
 		return $item_id;
-	} catch {
-		return 0;
-	}
-    
-
-	
+	} else {
+		return null;
+	}	
 }
 
 function get_item_stock_by_item_id($itemId, $apikey, $url) {
