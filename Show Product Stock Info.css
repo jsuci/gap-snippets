@@ -1,0 +1,28 @@
+form.variations_form.cart {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.prodInfo p {
+  margin-bottom: 6px;
+}
+
+.prodInfo {
+  margin-top: 1em;
+}
+
+.prodInfo {
+  display: block !important;
+}
+
+#stock_info {
+  display: block !important;
+}
+
+.bundledProdInfo {
+  display: block !important;
+}
+
+div[id^="bundled_stock_info_"] {
+  display: block !important;
+}
