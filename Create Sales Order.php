@@ -321,12 +321,12 @@ function insert_customer_erp_data($data) {
     );
 }
 
-function select_customer_erp($name, $email) {
+function select_customer_erp($name, $email, $state, $country) {
     global $wpdb;
 
     $table_name = $wpdb->prefix . 'customer_erp';
 
-    $results = $wpdb->get_results( "SELECT * FROM $table_name WHERE name LIKE '$name' AND email LIKE '$email';" );
+    $results = $wpdb->get_results( "SELECT * FROM $table_name WHERE name LIKE '$name' AND email LIKE '$email' AND state LIKE '$state' AND country LIKE '$country';" );
 
 	if(!$results) {
 		return null;
@@ -602,11 +602,11 @@ function get_wc_order_details($order_id) {
 // main execution
 function main($order_id) {
 	$current_order = get_wc_order_details($order_id);
-	$customer_erp = select_customer_erp($current_order['name'], $current_order['email']);
+	$customer_erp = select_customer_erp($current_order['name'], $current_order['email'], $current_order['state'], $current_order['country']);
 
 	if (!$customer_erp) {
 		create_erp_user($current_order, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
-		$customer_erp = select_customer_erp($current_order['name'], $current_order['email']);
+		$customer_erp = select_customer_erp($current_order['name'], $current_order['email'], $current_order['state'], $current_order['country']);
 		$current_order['customerid'] = $customer_erp->erpid;
 	} else {
 		$current_order['customerid'] = $customer_erp->erpid;
