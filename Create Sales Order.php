@@ -470,6 +470,8 @@ function get_wc_order_details($order_id) {
 	$order_data = $order->get_data();
 	$order_id = $order_data['id'];
 	$order_currency = $order_data['currency'];
+	$order_total_tax = $order_data['total_tax'];
+
 	$order_billing_first_name = $order_data['billing']['first_name'];
 	$order_billing_last_name = $order_data['billing']['last_name'];
 	$order_billing_full_name = $order_data['billing']['first_name'] . ' ' . $order_data['billing']['last_name'];
@@ -491,6 +493,8 @@ function get_wc_order_details($order_id) {
 	$items = array();
 	
 	$order_shipping_total = $order_data['shipping_total'];
+	$oder_basic_amount = $order_total - ($order_total_tax + $order_shipping_total);
+
 
 	if ($order_country === 'CANADA') {
 		$localShippingCharge = $order_shipping_total;
@@ -570,7 +574,7 @@ function get_wc_order_details($order_id) {
 		'currencyid' => $order_currency_id,
 		'customerGroupId' => 24,
 		'taxId' => $order_tax_id,
-		'orderbasicamount' => $order_total,
+		'orderbasicamount' => $oder_basic_amount,
 		'taxamount' => 0.00,
 		'discount' => 0.00,
 		'totalwithouttax' => 0.00,
@@ -578,7 +582,7 @@ function get_wc_order_details($order_id) {
 		'orderDate' => $order_date_created,
 		'terms' => '',
 		'items' => $items,
-		'invoice' => 'GOALIGNPILATES',
+		'invoice' => 'GAP',
 		'otherdiscount' => 0.00,
 		'customerpo' => $order_id,
 		'localShippingCharge' => $localShippingCharge,
@@ -608,6 +612,10 @@ function main($order_id) {
 		create_erp_user($current_order, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
 		$customer_erp = select_customer_erp($current_order['name'], $current_order['email'], $current_order['state'], $current_order['country']);
 		$current_order['customerid'] = $customer_erp->erpid;
+	} elseif ($current_order['state'] !== $customer_erp->state || $current_order['country'] !== $customer_erp->country) {
+		create_erp_user($current_order, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
+		$customer_erp = select_customer_erp($current_order['name'], $current_order['email'], $current_order['state'], $current_order['country']);
+		$current_order['customerid'] = $customer_erp->erpid;
 	} else {
 		$current_order['customerid'] = $customer_erp->erpid;
 	}
@@ -619,6 +627,7 @@ function main($order_id) {
 		$createso_result = create_erp_sales_order($current_order, 'Test@apikloz', 'http://sandbox.klozinc.exocloud.ca/api/exowebservice.asmx');
 		update_sales_order_erp($current_order['customerid'], $order_id, $createso_result['billno']);
 	}
+	
 }
 
 
