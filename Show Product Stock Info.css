@@ -12,17 +12,17 @@ form.variations_form.cart {
 }
 
 .prodInfo {
-  display: block !important;
+  display: none !important;
 }
 
 #stock_info {
-  display: block !important;
+  display: none !important;
 }
 
 .bundledProdInfo {
-  display: block !important;
+  display: none !important;
 }
 
 div[id^="bundled_stock_info_"] {
-  display: block !important;
+  display: none !important;
 }
